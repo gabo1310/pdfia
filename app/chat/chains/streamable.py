@@ -2,6 +2,12 @@ from queue import Queue
 from threading import Thread
 from app.chat.callbacks.stream import StreamingHandler
 from flask import current_app
+# warnings_filter.py
+import warnings
+
+# Ignorar todas las advertencias de LangChain deprecado
+warnings.filterwarnings("ignore", category=DeprecationWarning, module='langchain_core._api.deprecation')
+
 class StreamableChain:
     def stream(self, input):
         queue = Queue()

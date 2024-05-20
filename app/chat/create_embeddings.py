@@ -18,7 +18,6 @@ from langchain.embeddings.openai import OpenAIEmbeddings
 #from datasets import load_dataset
 from getpass import getpass
 from langchain.text_splitter import RecursiveCharacterTextSplitter,CharacterTextSplitter
-from langchain.prompts import MessagesPlaceholder,HumanMessagePromptTemplate, ChatPromptTemplate
 from dotenv import load_dotenv
 from langchain.memory import ConversationSummaryMemory ,ConversationBufferMemory, FileChatMessageHistory
 from langchain.document_loaders import TextLoader, PyPDFLoader

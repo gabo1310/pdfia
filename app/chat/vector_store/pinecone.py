@@ -2,6 +2,12 @@ import os
 import pinecone
 from langchain.vectorstores import Pinecone
 from app.chat.embeddings.openai import embeddings
+# warnings_filter.py
+import warnings
+
+# Ignorar todas las advertencias de LangChain deprecado
+warnings.filterwarnings("ignore", category=DeprecationWarning, module='langchain_core._api.deprecation')
+
 
 pinecone.Pinecone(
     api_key=os.getenv("PINECONE_API_KEY"),

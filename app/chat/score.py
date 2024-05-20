@@ -1,22 +1,26 @@
+"""
+Este módulo define funciones para gestionar los componentes del chat basados en sus puntuaciones almacenadas en Redis.
+Incluye funciones para seleccionar un componente aleatorio ponderado por su puntuación, actualizar las puntuaciones de una conversación, 
+y obtener las puntuaciones promedio de los componentes.
+"""
+
 from app.chat.redis import client
 import random
 
-
 def random_component_by_score(component_type, component_map):
-    # Make sure component_type is 'llm', 'retriever', or 'memory'
+    # Asegura que el tipo de componente sea 'llm', 'retriever' o 'memory'
     if component_type not in ["llm", "retriever", "memory"]:
         raise ValueError("Invalid component_type")
 
-    # From redis, get the hash containing the sum total scores for the given commponent_type
+    # Obtiene desde Redis el hash que contiene las puntuaciones totales de los componentes
     values = client.hgetall(f"{component_type}_score_values")
-    # From redis, get the hash containing the number of times each component has been voted on
+    # Obtiene desde Redis el hash que contiene la cantidad de votos de los componentes
     counts = client.hgetall(f"{component_type}_score_counts")
 
-    # Get all the valid component names from the component map
+    # Obtiene todos los nombres de componentes válidos desde el mapa de componentes
     names = component_map.keys()
 
-    # Loop over those valid names and use them to calculate the average score for each
-    # Add average score to a dictionary
+    # Calcula la puntuación promedio para cada componente y la agrega a un diccionario
     avg_scores = {}
     for name in names:
         score = int(values.get(name, 1))
@@ -24,7 +28,7 @@ def random_component_by_score(component_type, component_map):
         avg = score / count
         avg_scores[name] = max(avg, 0.1)
 
-    # Do a weighted random selection
+    # Selección aleatoria ponderada por la puntuación promedio
     sum_scores = sum(avg_scores.values())
     random_val = random.uniform(0, sum_scores)
     cumulative = 0
@@ -36,6 +40,7 @@ def random_component_by_score(component_type, component_map):
 def score_conversation(
     conversation_id: str, score: float, llm: str, retriever: str, memory: str
 ) -> None:
+    # Asegura que la puntuación esté entre 0 y 1
     score = min(max(score, 0), 1)
 
     client.hincrby("llm_score_values", llm, score)
@@ -46,9 +51,6 @@ def score_conversation(
 
     client.hincrby("memory_score_values", memory, score)
     client.hincrby("memory_score_counts", memory, 1)
-
-
-
 
 def get_scores():
     aggregate = {"llm": {}, "retriever": {}, "memory": {}}
@@ -66,5 +68,3 @@ def get_scores():
             aggregate[component_type][name] = [avg]
 
     return aggregate
-
-
